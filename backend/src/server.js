@@ -39,8 +39,11 @@ const startServer = async () => {
     await sequelize.sync({ alter: false });
     console.log('✅ Database schema synchronized.');
 
-    app.listen(PORT, () => {
-      console.log(`🚀 Store Rating Platform Backend running on http://localhost:${PORT}`);
+    return new Promise((resolve) => {
+      const server = app.listen(PORT, () => {
+        console.log(`🚀 Store Rating Platform Backend running on http://localhost:${PORT}`);
+        resolve(server);
+      });
     });
   } catch (error) {
     console.error('❌ Server startup error:', error);
@@ -48,4 +51,11 @@ const startServer = async () => {
   }
 };
 
-startServer();
+if (require.main === module) {
+  startServer();
+}
+
+module.exports = {
+  app,
+  startServer,
+};

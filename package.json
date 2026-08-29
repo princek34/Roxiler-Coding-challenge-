@@ -8,10 +8,18 @@
     "dev:frontend": "npm run dev --prefix frontend",
     "start": "npm run start --prefix backend",
     "seed": "npm run seed --prefix backend",
+    "test": "npm run test --prefix backend",
     "build": "npm run build --prefix frontend",
     "install:all": "npm install && npm install --prefix backend && npm install --prefix frontend"
   },
-  "keywords": ["fullstack", "react", "express", "mysql", "sequelize", "rating-platform"],
+  "keywords": [
+    "fullstack",
+    "react",
+    "express",
+    "mysql",
+    "sequelize",
+    "rating-platform"
+  ],
   "author": "Prince Kumar",
   "license": "ISC",
   "devDependencies": {

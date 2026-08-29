@@ -1,4 +1,27 @@
 const http = require('http');
+const { startServer } = require('../server');
+
+// Helper to check if a port is in use
+const checkServerRunning = (port = 5000) => {
+  return new Promise((resolve) => {
+    const req = http.request(
+      {
+        hostname: 'localhost',
+        port,
+        path: '/api/health',
+        method: 'GET',
+        timeout: 1000,
+      },
+      (res) => resolve(true)
+    );
+    req.on('error', () => resolve(false));
+    req.on('timeout', () => {
+      req.destroy();
+      resolve(false);
+    });
+    req.end();
+  });
+};
 
 // Helper to make HTTP JSON requests
 const request = (method, path, body = null, token = null) => {
@@ -45,11 +68,23 @@ const request = (method, path, body = null, token = null) => {
 const runTests = async () => {
   console.log('🧪 Starting Full-Stack End-to-End API Test Suite...\n');
 
+  let serverInstance = null;
+  const isRunning = await checkServerRunning(5000);
+
+  if (!isRunning) {
+    console.log('⚡ Server is not running on port 5000. Auto-starting server instance for test...');
+    serverInstance = await startServer();
+    // Allow brief moment for connections
+    await new Promise((r) => setTimeout(r, 500));
+  } else {
+    console.log('⚡ Detected running backend server on port 5000. Running tests against live instance...');
+  }
+
   try {
     // 1. Health check
-    console.log('1. Testing Health Endpoint:');
+    console.log('\n1. Testing Health Endpoint:');
     const health = await request('GET', '/health');
-    console.log(`   Status: ${health.status}, Response:`, health.body);
+    console.log(`   Status: ${health.status}, Service:`, health.body?.service);
 
     // 2. Admin Login
     console.log('\n2. Testing Admin Login:');
@@ -63,7 +98,7 @@ const runTests = async () => {
     // 3. Admin Dashboard Stats
     console.log('\n3. Testing Admin Dashboard Stats:');
     const stats = await request('GET', '/admin/dashboard', null, adminToken);
-    console.log(`   Status: ${stats.status}, Stats:`, stats.body?.stats);
+    console.log(`   Status: ${stats.status}, Total Users: ${stats.body?.stats?.totalUsers}, Stores: ${stats.body?.stats?.totalStores}, Ratings: ${stats.body?.stats?.totalRatings}`);
 
     // 4. Admin Users List with Store Owner Rating Check
     console.log('\n4. Testing Admin Users List:');
@@ -92,7 +127,7 @@ const runTests = async () => {
     // 7. Normal User Stores Browsing with Submitted Ratings
     console.log('\n7. Testing Normal User Stores Catalog:');
     const userStores = await request('GET', '/stores', null, userToken);
-    console.log(`   Status: ${userStores.status}, Store 1: ${userStores.body?.stores[0]?.name}, Overall Rating: ${userStores.body?.stores[0]?.overallRating}, My Rating: ${userStores.body?.stores[0]?.myRating}`);
+    console.log(`   Status: ${userStores.status}, Store 1: ${userStores.body?.stores[0]?.name}, Overall Rating: ${userStores.body?.stores[0]?.overallRating}`);
 
     // 8. Normal User Submit Rating (5 Stars)
     console.log('\n8. Testing Normal User Submit Rating:');
@@ -123,12 +158,24 @@ const runTests = async () => {
     });
     const ownerToken = ownerLogin.body?.token;
     const ownerDash = await request('GET', '/ratings/owner-dashboard', null, ownerToken);
-    console.log(`   Status: ${ownerDash.status}, Store: ${ownerDash.body?.store?.name}, Avg Rating: ${ownerDash.body?.stats?.averageRating}, Reviews Count: ${ownerDash.body?.ratings?.length}`);
+    console.log(`   Status: ${ownerDash.status}, Store: ${ownerDash.body?.store?.name}, Avg Rating: ${ownerDash.body?.stats?.averageRating}, Reviews: ${ownerDash.body?.ratings?.length}`);
 
-    console.log('\n🎉 ALL 10 API TEST SUITES PASSED FLAWLESSLY!\n');
-    process.exit(0);
+    console.log('\n========================================');
+    console.log('🎉 ALL 10 TEST SUITES PASSED SUCCESSFULLY!');
+    console.log('========================================\n');
+
+    if (serverInstance) {
+      serverInstance.close(() => {
+        process.exit(0);
+      });
+    } else {
+      process.exit(0);
+    }
   } catch (err) {
-    console.error('❌ Test failed:', err);
+    console.error('❌ Test failed:', err.message || err);
+    if (serverInstance) {
+      serverInstance.close();
+    }
     process.exit(1);
   }
 };
