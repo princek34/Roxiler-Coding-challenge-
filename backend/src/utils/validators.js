@@ -28,8 +28,8 @@ const validate = (validations) => {
 const registerValidation = [
   body('name')
     .trim()
-    .isLength({ min: 20, max: 60 })
-    .withMessage('Name must be between 20 and 60 characters long.'),
+    .isLength({ min: 2, max: 60 })
+    .withMessage('Name must be between 2 and 60 characters long.'),
   body('email')
     .trim()
     .isEmail()
@@ -71,8 +71,8 @@ const updatePasswordValidation = [
 const createUserValidation = [
   body('name')
     .trim()
-    .isLength({ min: 20, max: 60 })
-    .withMessage('Name must be between 20 and 60 characters long.'),
+    .isLength({ min: 2, max: 60 })
+    .withMessage('Name must be between 2 and 60 characters long.'),
   body('email')
     .trim()
     .isEmail()
@@ -97,8 +97,8 @@ const createUserValidation = [
 const createStoreValidation = [
   body('name')
     .trim()
-    .isLength({ min: 20, max: 60 })
-    .withMessage('Store Name must be between 20 and 60 characters long.'),
+    .isLength({ min: 2, max: 60 })
+    .withMessage('Store Name must be between 2 and 60 characters long.'),
   body('email')
     .trim()
     .isEmail()

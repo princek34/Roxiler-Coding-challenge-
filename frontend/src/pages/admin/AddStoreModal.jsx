@@ -129,12 +129,12 @@ export const AddStoreModal = ({ isOpen, onClose, onStoreCreated }) => {
             </label>
             <span
               className={`text-[11px] font-medium ${
-                formData.name.length >= 20 && formData.name.length <= 60
+                formData.name.length >= 2 && formData.name.length <= 60
                   ? 'text-emerald-600'
                   : 'text-slate-400'
               }`}
             >
-              {formData.name.length}/60 (min 20)
+              {formData.name.length}/60 max
             </span>
           </div>
           <div className="relative">

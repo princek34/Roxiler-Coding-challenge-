@@ -129,12 +129,12 @@ export const Signup = () => {
                 </label>
                 <span
                   className={`text-[11px] font-medium ${
-                    formData.name.length >= 20 && formData.name.length <= 60
+                    formData.name.length >= 2 && formData.name.length <= 60
                       ? 'text-emerald-600'
                       : 'text-slate-400'
                   }`}
                 >
-                  {formData.name.length}/60 chars (min 20)
+                  {formData.name.length}/60 chars max
                 </span>
               </div>
               <div className="relative">
@@ -147,7 +147,7 @@ export const Signup = () => {
                   value={formData.name}
                   onChange={handleChange}
                   onBlur={() => handleBlur('name')}
-                  placeholder="e.g. Jonathan Edward Normal User One"
+                  placeholder="e.g. Jonathan Edward"
                   maxLength={60}
                   className={`w-full pl-10 pr-4 py-2.5 bg-slate-50 border rounded-xl text-slate-900 text-sm focus:outline-none focus:ring-2 focus:bg-white transition ${
                     nameError

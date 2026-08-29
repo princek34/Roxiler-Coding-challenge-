@@ -8,8 +8,8 @@ export const validateName = (name) => {
     return 'Name is required.';
   }
   const trimmed = name.trim();
-  if (trimmed.length < 20) {
-    return `Name must be at least 20 characters (currently ${trimmed.length}).`;
+  if (trimmed.length < 2) {
+    return 'Name must be at least 2 characters.';
   }
   if (trimmed.length > 60) {
     return `Name must be at most 60 characters (currently ${trimmed.length}).`;

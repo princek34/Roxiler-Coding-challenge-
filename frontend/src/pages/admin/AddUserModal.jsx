@@ -143,12 +143,12 @@ export const AddUserModal = ({ isOpen, onClose, onUserCreated }) => {
             </label>
             <span
               className={`text-[11px] font-medium ${
-                formData.name.length >= 20 && formData.name.length <= 60
+                formData.name.length >= 2 && formData.name.length <= 60
                   ? 'text-emerald-600'
                   : 'text-slate-400'
               }`}
             >
-              {formData.name.length}/60 (min 20)
+              {formData.name.length}/60 max
             </span>
           </div>
           <div className="relative">
@@ -161,7 +161,7 @@ export const AddUserModal = ({ isOpen, onClose, onUserCreated }) => {
               value={formData.name}
               onChange={handleChange}
               onBlur={() => handleBlur('name')}
-              placeholder="e.g. Richard Feynman Senior Admin"
+              placeholder="e.g. Richard Feynman"
               maxLength={60}
               className={`w-full pl-9 pr-3 py-2 bg-slate-50 border rounded-xl text-slate-900 text-xs focus:outline-none focus:ring-2 focus:bg-white transition ${
                 nameError
