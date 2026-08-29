@@ -16,7 +16,18 @@ const signup = async (req, res, next) => {
   try {
     const { name, email, password, address } = req.body;
 
-    const existingUser = await User.findOne({ where: { email } });
+    if (!name || !email || !password || !address) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide all required fields: Name, Email, Password, and Address.',
+      });
+    }
+
+    const cleanEmail = email.toLowerCase().trim();
+    const cleanName = name.trim();
+    const cleanAddress = address.trim();
+
+    const existingUser = await User.findOne({ where: { email: cleanEmail } });
     if (existingUser) {
       return res.status(400).json({
         success: false,
@@ -26,10 +37,10 @@ const signup = async (req, res, next) => {
 
     // Normal users sign up through this endpoint
     const user = await User.create({
-      name,
-      email,
+      name: cleanName,
+      email: cleanEmail,
       password,
-      address,
+      address: cleanAddress,
       role: 'NORMAL_USER',
     });
 
@@ -59,8 +70,17 @@ const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide both email and password.',
+      });
+    }
+
+    const cleanEmail = email.toLowerCase().trim();
+
     const user = await User.findOne({
-      where: { email },
+      where: { email: cleanEmail },
       include: [
         {
           model: Store,

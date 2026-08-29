@@ -1,26 +1,27 @@
 const errorHandler = (err, req, res, next) => {
-  console.error('Error encountered:', err);
+  console.error('API Error Handler Caught:', err);
 
-  // Sequelize Unique Constraint Error
-  if (err.name === 'SequelizeUniqueConstraintError') {
-    const field = err.errors[0]?.path || 'Field';
+  // 1. Sequelize Unique Constraint Error (e.g. duplicate email)
+  if (err.name === 'SequelizeUniqueConstraintError' || err.code === 'ER_DUP_ENTRY') {
+    const field = (err.errors && err.errors[0]?.path) ? err.errors[0].path : 'Field';
     return res.status(400).json({
       success: false,
-      message: `${field.charAt(0).toUpperCase() + field.slice(1)} already exists in the system.`,
-      errors: err.errors.map((e) => ({ field: e.path, message: e.message })),
+      message: `An account or record with this ${field} already exists.`,
+      errors: err.errors ? err.errors.map((e) => ({ field: e.path, message: e.message })) : [],
     });
   }
 
-  // Sequelize Validation Error
+  // 2. Sequelize Validation Error
   if (err.name === 'SequelizeValidationError') {
+    const msg = (err.errors && err.errors[0]?.message) ? err.errors[0].message : 'Validation failed.';
     return res.status(400).json({
       success: false,
-      message: err.errors[0]?.message || 'Validation failed.',
-      errors: err.errors.map((e) => ({ field: e.path, message: e.message })),
+      message: msg,
+      errors: err.errors ? err.errors.map((e) => ({ field: e.path, message: e.message })) : [],
     });
   }
 
-  // Sequelize Foreign Key Constraint Error
+  // 3. Sequelize Foreign Key Constraint Error
   if (err.name === 'SequelizeForeignKeyConstraintError') {
     return res.status(400).json({
       success: false,
@@ -28,11 +29,24 @@ const errorHandler = (err, req, res, next) => {
     });
   }
 
+  // 4. Database Connection Errors
+  if (
+    err.name === 'SequelizeConnectionError' ||
+    err.name === 'SequelizeConnectionRefusedError' ||
+    err.name === 'SequelizeHostNotFoundError' ||
+    err.name === 'SequelizeAccessDeniedError'
+  ) {
+    return res.status(503).json({
+      success: false,
+      message: 'Database connection failed. Please ensure MySQL service is running and credentials in .env are correct.',
+    });
+  }
+
+  // 5. Default Fallback
   const statusCode = err.statusCode || 500;
-  res.status(statusCode).json({
+  return res.status(statusCode).json({
     success: false,
-    message: err.message || 'Internal Server Error',
-    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
+    message: err.message || 'An unexpected error occurred. Please try again.',
   });
 };
 
